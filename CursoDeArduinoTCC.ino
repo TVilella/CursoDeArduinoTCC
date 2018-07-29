@@ -154,8 +154,8 @@ void loop() {
       break;
       
     case 3:
-      valorTempo1 = 10; //Define um tempo padrão inicial, caso a funcaoMenu1() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
-      valorTempo2 = 30; //Define um tempo padrão inicial, caso a funcaoMenu2() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
+      valorTempo1 = 30; //Define um tempo padrão inicial, caso a funcaoMenu1() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
+      valorTempo2 = 10; //Define um tempo padrão inicial, caso a funcaoMenu2() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
       funcaoMenu2(); //Chama funcaoMenu2() para escolher os valores dos "timers"
       if (executar) funcaoExec3(); //Executa a funcao do modo escolhido     
       displayoLed.clear(); //Limpa o Display   
