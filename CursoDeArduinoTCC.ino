@@ -1,5 +1,7 @@
-/* TCC Curso de Arduino - BrincandoComIdeias
+/*  TCC Curso de Arduino - BrincandoComIdeias
+ *  Link do curso - https://go.hotmart.com/W8213658G
  *  Aluno - Thiago Vilella
+ *  Professor - Flávio guimarães
  *  Projeto proposto - Timer estilo microondas
  *  
  *  Solicitações:  
@@ -7,6 +9,7 @@
  *  - Contagem de tempo de forma decrescente com acionamento de carga durante contagem ;
  *  - Valores pré determinados para solicitação do usuário ;
  *  - Menu para interação do usuário
+ *  
  *  Limitações:
  *  - Máx 4 botões ;
  *  
@@ -14,18 +17,19 @@
  *  -Contagem regressiva sem acionamento seguida de contagem progressiva com acionamento;
  *  -Interrupção caso botão pressionado durante operação
  * 
- * Hardware:
- * - 3 pushbutton
- * - 1 display oled
- * - Arduino Uno
- * - modulo relay
- * 
+ *  Hardware:
+ *  - 3 pushbutton
+ *  - 1 display oled
+ *  - Arduino Uno
+ *  - modulo relay
  */
- 
+
+ //Incluindo Bibliotecas
 #include <Arduino.h>
 #include <Wire.h>
 #include <MicroLCD.h>
 
+//Definindo pinos dos botões e Relé
 #define pinBot1 8
 #define pinBot2 9
 #define pinBot3 10
@@ -36,7 +40,6 @@
 LCD_SSD1306 displayoLed; // Instanciando meu display Oled process SSD1306
 
 // String com logo do BrincandoComIdeias
-
 const PROGMEM uint8_t logo[48 * 48 / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xC0, 0xC0, 0xE0, 0xE0,
 0xF0, 0xF0, 0xF8, 0xF8, 0xF8, 0xF8, 0xF8, 0x18, 0x18, 0xF8, 0xF8, 0xF8, 0xF8, 0xF8, 0xF0, 0xF0,
@@ -58,14 +61,13 @@ const PROGMEM uint8_t logo[48 * 48 / 8] = {
 0x07, 0x03, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-//Criando classe para botão
-
+//Criando classe para pushbutton 
 class PushButton {
   public:
-    PushButton (byte pinBotao, byte tempoDebounce = 200);
-    void button_loop();
-    bool pressed();  
-    bool estadoBotao;
+    PushButton (byte pinBotao, byte tempoDebounce = 200); // Método construtor
+    void button_loop(); // Métodolo para leitura dos botões
+    bool pressed();  // Método que retorna valor da propriedade apertado
+    bool estadoBotao; // propriedade com o estado do botão
   private:
     unsigned long debounceBotao;
     bool estadoBotaoAnt = HIGH;
@@ -74,14 +76,14 @@ class PushButton {
     byte tempo;
 };
 
-// Função/Método construtora é o método que tem o mesmo nome que a classe e não recebe tipo
+// Método construtora é o método que tem o mesmo nome que a classe e não recebe tipo é acionado ao instanciar o objeto
 PushButton::PushButton (byte pinBotao, byte tempoDebounce) {
   pinMode(pinBotao,INPUT_PULLUP);
   pino = pinBotao;
   tempo = tempoDebounce;
 }
 
-// Declarando os métodos da classe botão, demais métodos recebem tipo
+// Declarando os métodos da classe PushButton, demais métodos recebem tipo
 void PushButton::button_loop() {
   estadoBotao = digitalRead(pino);
   apertado = false;
@@ -98,69 +100,66 @@ bool PushButton::pressed(){
 }
 
 //Instanciando objetos
-
 PushButton botao1(pinBot1);
 PushButton botao2(pinBot2);
 PushButton botao3(pinBot3);
 PushButton botao4(pinBot4);
 
 //Declaração de variáveis globais
-
 int valorTempo1 = 30; //Variável para guardar o valor do timer
 int valorTempo2 = 30; //Variável para guardar o valor de espera para ativar o timer
 byte contadorFuncao = 0; // contador para saber qual valor estamos
 bool executar = false; // Aciona execucao do funcao selecionada
-unsigned long controleTempo = millis();
+unsigned long controleTempo = millis(); //Variável para controlar o tempo
 
 void setup() {
-  // put your setup code here, to run once:
 
   displayoLed.begin(); //Iniciando o objeto display
-  pinMode(pinRelay,OUTPUT);
+  pinMode(pinRelay,OUTPUT); // Definindo pino do Relé como OUTPUT
 
-  displayoLed.clear();
-  displayoLed.setCursor(40,1);
-  displayoLed.draw(logo,48,48);
+  displayoLed.clear(); // Limpando o display
+  displayoLed.setCursor(40,1); // Posicionando cursor na coluna 40 linha 1
+  displayoLed.draw(logo,48,48); // Desenhando no display parametros (imagem,largura,altura)
 
-  digitalWrite(pinRelay,HIGH);
+  digitalWrite(pinRelay,HIGH); // Saída em HIGH para manter Relé desligado e ligar o LED de estado
   
-
 }
 
 void loop() {
     
-  botao1.button_loop();
-  botao2.button_loop();
-  botao3.button_loop();
+  botao1.button_loop(); // Método para ler estado do objeto botao1
+  botao2.button_loop(); // Método para ler estado do objeto botao2
+  botao3.button_loop(); // Método para ler estado do objeto botao3
 
-  if(botao2.pressed() && contadorFuncao < 4) contadorFuncao++;
-  if( contadorFuncao >= 4) contadorFuncao = 0;
+  if(botao2.pressed() && contadorFuncao < 4) contadorFuncao++; // Condição para alterar contadorFuncao caso botao2 seja apertado
+  if( contadorFuncao >= 4) contadorFuncao = 0; // Caso o contador função == a 4 volta para 0, Paraq contadorFuncao maior que 4 apenas usando botao2 durante a execução da funcaoMenu1() dentro de funcaoMenu2() 
 
+  //Utilizando switch() ... case para substituir série de if()
   switch(contadorFuncao){
-    case 0:
+    case 0: //Case 0 para apresentação do logo, não deve executar carga é uma tela de "descanço"
       displayoLed.setCursor(40,1);
       displayoLed.draw(logo,48,48);
       break;
     
-    case 1:
-      valorTempo1 = 30;
-      funcaoMenu1();
-      if (executar) funcaoExec1(); // Executa a funcao do modo escolhido 
+    case 1: //Entra no menu para executar a contagem de tempo de forma crescente com acionamento de carga
+      valorTempo1 = 30; //Define um tempo padrão inicial, caso a funcaoMenu1() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
+      funcaoMenu1(); //Chama funcaoMenu1() para escolher o valor do timer
+      if (executar) funcaoExec1(); //Executa a funcao do modo escolhido 
       break;
       
     case 2:
-      valorTempo1 = 30;
-      funcaoMenu1();
-      if (executar) funcaoExec2(); // Executa a funcao do modo escolhido 
+      valorTempo1 = 30; //Define um tempo padrão inicial, caso a funcaoMenu1() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
+      funcaoMenu1(); //Chama funcaoMenu1() para escolher o valor do timer
+      if (executar) funcaoExec2(); //Executa a funcao do modo escolhido 
       break;
       
     case 3:
-      valorTempo1 = 30;
-      valorTempo2 = 30;
-      funcaoMenu2(); 
-      if (executar) funcaoExec3(); // Executa a funcao do modo escolhido     
-      displayoLed.clear(); // Limpa o Display   
-      executar = false;
+      valorTempo1 = 10; //Define um tempo padrão inicial, caso a funcaoMenu1() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
+      valorTempo2 = 30; //Define um tempo padrão inicial, caso a funcaoMenu2() receba executar irá utilizar o tempo padrão independente do que tenha sido escolhido em outro case
+      funcaoMenu2(); //Chama funcaoMenu2() para escolher os valores dos "timers"
+      if (executar) funcaoExec3(); //Executa a funcao do modo escolhido     
+      displayoLed.clear(); //Limpa o Display   
+      executar = false; //Define executar como false para que o proximo case não entre executando
       break;
   }
 
@@ -182,11 +181,11 @@ void funcaoMenu1(){
   displayoLed.printLong(contadorFuncao);
 
   
-  while( executar == false ){ /* Para sair do While precisa acionar o botao 4 para executar ir para true */
+  while( executar == false ){ /* Para sair do While precisa acionar o botao 4 para executar = true */
 
         
     if(valorAnterior != valorTimer){
-      displayoLed.clear();
+      displayoLed.clear();// limpando display e levando cursor para posição 0,0
       displayoLed.setFontSize(FONT_SIZE_LARGE); // Setando tamanho da fonte
       displayoLed.print("Timer: ");
       displayoLed.printLong(valorTimer); // imprimindo o valor armazenado para Timer
@@ -201,11 +200,11 @@ void funcaoMenu1(){
     botao2.button_loop();
     if (botao2.pressed()) {
       contadorFuncao++; // muda o contador da função para ir para o próximo menu
-      break; // Sai do While caso aperto o botao 2.
+      break; // Sai do While caso aperto o botao 2, mudando de case sem executar a função do case atual.
     }
     
-    botao4.button_loop();    
-    if (botao4.pressed()) executar = true; 
+    botao4.button_loop(); //Leitura do estado do botao 4   
+    if (botao4.pressed()) executar = true; //Executar sai do while e aciona a funcaoExec1()
     
   }
     
@@ -228,10 +227,10 @@ void funcaoMenu2(){
         displayoLed.printLong(valorTimer); // imprimindo o valor armazenado para Timer
         displayoLed.setCursor(0,4);
         displayoLed.print("Menu: ");
-        displayoLed.printLong(contadorFuncao);
+        displayoLed.printLong(contadorFuncao); //Vantagem de imprimir o contadorFuncao ao invés de colocar número é poder ver o valor do contadorFuncao serve como debug
       }
   
-      valorAnterior = valorTimer;
+      valorAnterior = valorTimer; 
       valorTimer = funcaoTimer2();
       
       botao2.button_loop();
@@ -296,10 +295,9 @@ void funcaoExec1(){
     else if (botao2.pressed()){
       executar = false;
       contadorFuncao++;
-      break;
+      break;      
     }
-    
-    
+        
   }
   digitalWrite(pinRelay, HIGH);
   
@@ -336,8 +334,7 @@ void funcaoExec2(){
       displayoLed.printLong(valorTempo1);
       displayoLed.setCursor(0, 4);
       displayoLed.print("ate: ");
-      displayoLed.printLong(0);
-  
+      displayoLed.printLong(0);  
     }
     
     botao1.button_loop();
@@ -390,8 +387,7 @@ void funcaoNExec(){
       displayoLed.printLong(valorTempo2);
       displayoLed.setCursor(0, 4);
       displayoLed.print("ate: ");
-      displayoLed.printLong(0);
-  
+      displayoLed.printLong(0);  
     }
     
     botao1.button_loop();
