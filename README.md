@@ -1,7 +1,7 @@
 # Final Lesson - Class of Arduino 
 ### Description
 
-Lesson was proposed in the class of arduino [Portuguese Course](https://go.hotmart.com/W8213658G) live - 02
+Lesson was proposed in the class of arduino [Portuguese Course](https://go.hotmart.com/W8213658G) live - 01
 
  Requests:
  - Increasing time count with load trigger;
@@ -32,7 +32,7 @@ Lesson was proposed in the class of arduino [Portuguese Course](https://go.hotma
 # TCC Curso De Arduino 
 ### Descrição
 
-TCC Proposto para o [CursoDeArduino](https://go.hotmart.com/W8213658G) Live - 02
+TCC Proposto para o [CursoDeArduino](https://go.hotmart.com/W8213658G) Live - 01
 
    Solicitações:  
    - Contagem de tempo de forma crescente com acionamento de carga ; 

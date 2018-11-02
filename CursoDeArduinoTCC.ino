@@ -28,6 +28,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <MicroLCD.h>
+#include "PushButton.h"
 
 //Definindo pinos dos botões e Relé
 #define pinBot1 8
@@ -61,44 +62,6 @@ const PROGMEM uint8_t logo[48 * 48 / 8] = {
 0x07, 0x03, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-//Criando classe para pushbutton 
-class PushButton {
-  public:
-    PushButton (byte pinBotao, byte tempoDebounce = 200); // Método construtor
-    void button_loop(); // Métodolo para leitura dos botões
-    bool pressed();  // Método que retorna valor da propriedade apertado
-    bool estadoBotao; // propriedade com o estado do botão
-  private:
-    unsigned long debounceBotao;
-    bool estadoBotaoAnt = HIGH;
-    bool apertado = false;
-    byte pino;
-    byte tempo;
-};
-
-// Método construtora é o método que tem o mesmo nome que a classe e não recebe tipo é acionado ao instanciar o objeto
-PushButton::PushButton (byte pinBotao, byte tempoDebounce) {
-  pinMode(pinBotao,INPUT_PULLUP);
-  pino = pinBotao;
-  tempo = tempoDebounce;
-}
-
-// Declarando os métodos da classe PushButton, demais métodos recebem tipo
-void PushButton::button_loop() {
-  estadoBotao = digitalRead(pino);
-  apertado = false;
-  if( (millis() - debounceBotao) > tempo) if(!estadoBotao && estadoBotaoAnt){
-      apertado = true;
-      debounceBotao = millis();
-    }
-  
-  estadoBotaoAnt = estadoBotao;
-}
-
-bool PushButton::pressed(){
-  return apertado;
-}
-
 //Instanciando objetos
 PushButton botao1(pinBot1);
 PushButton botao2(pinBot2);
@@ -127,9 +90,9 @@ void setup() {
 
 void loop() {
     
-  botao1.button_loop(); // Método para ler estado do objeto botao1
-  botao2.button_loop(); // Método para ler estado do objeto botao2
-  botao3.button_loop(); // Método para ler estado do objeto botao3
+  botao1.lerBotao(); // Método para ler estado do objeto botao1
+  botao2.lerBotao(); // Método para ler estado do objeto botao2
+  botao3.lerBotao(); // Método para ler estado do objeto botao3
 
   if(botao2.pressed() && contadorFuncao < 4) contadorFuncao++; // Condição para alterar contadorFuncao caso botao2 seja apertado
   if( contadorFuncao >= 4) contadorFuncao = 0; // Caso o contador função == a 4 volta para 0, Paraq contadorFuncao maior que 4 apenas usando botao2 durante a execução da funcaoMenu1() dentro de funcaoMenu2() 
@@ -197,13 +160,13 @@ void funcaoMenu1(){
     valorAnterior = valorTimer;
     valorTimer = funcaoTimer();
     
-    botao2.button_loop();
+    botao2.lerBotao();
     if (botao2.pressed()) {
       contadorFuncao++; // muda o contador da função para ir para o próximo menu
       break; // Sai do While caso aperto o botao 2, mudando de case sem executar a função do case atual.
     }
     
-    botao4.button_loop(); //Leitura do estado do botao 4   
+    botao4.lerBotao(); //Leitura do estado do botao 4   
     if (botao4.pressed()) executar = true; //Executar sai do while e aciona a funcaoExec1()
     
   }
@@ -233,13 +196,13 @@ void funcaoMenu2(){
       valorAnterior = valorTimer; 
       valorTimer = funcaoTimer2();
       
-      botao2.button_loop();
+      botao2.lerBotao();
       if (botao2.pressed()) {
         contadorFuncao++; // muda o contador da função para ir para o próximo menu
         break; // Sai do While caso aperto o botao 2.
       }
       
-      botao4.button_loop();    
+      botao4.lerBotao();    
       if (botao4.pressed()) executar = true; 
       
     }    
@@ -284,10 +247,10 @@ void funcaoExec1(){
       displayoLed.printLong(valorTempo1);
     }
     
-    botao1.button_loop();
-    botao2.button_loop();
-    botao3.button_loop();   
-    botao4.button_loop();
+    botao1.lerBotao();
+    botao2.lerBotao();
+    botao3.lerBotao();   
+    botao4.lerBotao();
     
     if (botao1.pressed() && (valorTempo1>30) ) valorTempo1 -= 30; 
     else if (botao3.pressed() && (valorTempo1<300)) valorTempo1 += 30;
@@ -337,10 +300,10 @@ void funcaoExec2(){
       displayoLed.printLong(0);  
     }
     
-    botao1.button_loop();
-    botao2.button_loop();
-    botao3.button_loop();   
-    botao4.button_loop();
+    botao1.lerBotao();
+    botao2.lerBotao();
+    botao3.lerBotao();   
+    botao4.lerBotao();
     if (botao1.pressed() && (valorTempo1 > 30) ) valorTempo1 -= 30; 
     else if (botao3.pressed() && (valorTempo1 < 300)) valorTempo1 += 30;
     else if (botao4.pressed()) executar = false;
@@ -390,10 +353,10 @@ void funcaoNExec(){
       displayoLed.printLong(0);  
     }
     
-    botao1.button_loop();
-    botao2.button_loop();
-    botao3.button_loop();   
-    botao4.button_loop();
+    botao1.lerBotao();
+    botao2.lerBotao();
+    botao3.lerBotao();   
+    botao4.lerBotao();
     if (botao1.pressed() && (valorTempo2 > 30) ) valorTempo2 -= 30; 
     else if (botao3.pressed() && (valorTempo2 < 300)) valorTempo2 += 30;
     else if (botao4.pressed()) executar = false;
@@ -416,8 +379,8 @@ void funcaoExec3(){
 
 //Função para incremento do tempo de 30 em 30
 int funcaoTimer(){
-    botao1.button_loop();
-    botao3.button_loop(); 
+    botao1.lerBotao();
+    botao3.lerBotao(); 
   if(botao1.pressed() && botao3.pressed()) return valorTempo1;
     else if(valorTempo1 < 300 && botao3.pressed()) valorTempo1 += 30;
     else if(valorTempo1 > 30 && botao1.pressed()) valorTempo1 -= 30;
@@ -426,8 +389,8 @@ int funcaoTimer(){
 
 //Função para incremento do tempo2 de 30 em 30
 int funcaoTimer2(){  
-    botao1.button_loop();
-    botao3.button_loop();
+    botao1.lerBotao();
+    botao3.lerBotao();
   if(botao1.pressed() && botao3.pressed()) return valorTempo2;
     else if(valorTempo2 < 300 && botao3.pressed()) valorTempo2 += 30;
     else if(valorTempo2 > 30 && botao1.pressed()) valorTempo2 -= 30;
